@@ -150,7 +150,6 @@ end
     ρ = P.ρ; t = inv(1-ρ^2)
     T = eltype(P)
     Ps = SemiclassicalJacobi{T}.(t,1,1,0:∞)
-    D = Derivative(axes(Ps[1],1))
     Δs = BroadcastVector{AbstractMatrix{T}}((C,B,A) -> 4t*(1-ρ^2)^2*divdiff(HalfWeighted{:c}(C), HalfWeighted{:c}(B))*divdiff(HalfWeighted{:ab}(B), HalfWeighted{:ab}(A)), Ps, SemiclassicalJacobi.(t,0,0,1:∞), Ps)
     P * ModalInterlace(Δs, (ℵ₀,ℵ₀), (2,2))
 end
@@ -160,7 +159,6 @@ end
     t = inv(1-ρ^2)
     T = eltype(P)
     Ps = SemiclassicalJacobi.(t,b,a,0:∞)
-    # D = Derivative(axes(Ps[1],1))
     Δs = BroadcastVector{AbstractMatrix{T}}((C,B,A) -> 4t*divdiff(HalfWeighted{:c}(C), HalfWeighted{:c}(B))*divdiff(B, A), SemiclassicalJacobi.(t,b+2,a+2,0:∞), SemiclassicalJacobi.(t,b+1,a+1,1:∞), Ps)
     ZernikeAnnulus(ρ,a+2,b+2) * ModalInterlace(Δs, (ℵ₀,ℵ₀), (-2,6))
 end
