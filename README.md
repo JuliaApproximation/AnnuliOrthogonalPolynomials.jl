@@ -1,4 +1,9 @@
 ## AnnuliOrthogonalPolynomials.jl
+
+[![Build Status](https://github.com/ioannisPApapadopoulos/AnnuliOrthogonalPolynomials.jl/workflows/CI/badge.svg)](https://github.com/JuliaApproximation/MultivariateOrthogonalPolynomials.jl/actions)
+[![codecov](https://github.com/ioannisPApapadopoulos/AnnuliOrthogonalPolynomials.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaApproximation/MultivariateOrthogonalPolynomials.jl)
+
+
 A Julia package for orthogonal polynomials on an annulus.
 
 This code used to be part of [AlgebraicCurveOrthogonalPolynomials.jl](https://github.com/JuliaApproximation/AlgebraicCurveOrthogonalPolynomials.jl).
