@@ -1,7 +1,7 @@
 ## AnnuliOrthogonalPolynomials.jl
 
-[![Build Status](https://github.com/ioannisPApapadopoulos/AnnuliOrthogonalPolynomials.jl/workflows/CI/badge.svg)](https://github.com/JuliaApproximation/MultivariateOrthogonalPolynomials.jl/actions)
-[![codecov](https://github.com/ioannisPApapadopoulos/AnnuliOrthogonalPolynomials.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaApproximation/MultivariateOrthogonalPolynomials.jl)
+[![Build Status](https://github.com/ioannisPApapadopoulos/AnnuliOrthogonalPolynomials.jl/workflows/CI/badge.svg)](https://github.com/ioannisPApapadopoulos/AnnuliOrthogonalPolynomials.jl/actions)
+[![codecov.io](http://codecov.io/github/ioannisPApapadopoulos/AnnuliOrthogonalPolynomials.jl/coverage.svg?branch=main)](http://codecov.io/github/ioannisPApapadopoulos/AnnuliOrthogonalPolynomials.jl?branch=main)
 
 
 A Julia package for orthogonal polynomials on an annulus.
