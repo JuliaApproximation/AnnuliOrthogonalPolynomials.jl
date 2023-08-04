@@ -2,3 +2,42 @@ name = "AnnuliOrthogonalPolynomials"
 uuid = "de1797fd-24c3-4035-91a2-b52aecdcfb01"
 authors = ["john.papad "]
 version = "0.1.0"
+
+[deps]
+BlockArrays = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
+BlockBandedMatrices = "ffab5731-97b5-5995-9138-79e8c1846df0"
+ClassicalOrthogonalPolynomials = "b30e2e7b-c4ee-47da-9d5f-2c5c27239acd"
+ContinuumArrays = "7ae1f121-cc2c-504b-ac30-9b923412ae5c"
+DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
+FastTransforms = "057dd010-8810-581a-b7be-e3fc3b93f78c"
+FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
+HarmonicOrthogonalPolynomials = "e416a80e-9640-42f3-8df8-80a93ca01ea5"
+LazyArrays = "5078a376-72f3-5289-bfd5-ec5146d43c02"
+MultivariateOrthogonalPolynomials = "4f6956fd-4f93-5457-9149-7bfc4b2ce06d"
+QuasiArrays = "c4ea9172-b204-11e9-377d-29865faadc5c"
+SemiclassicalOrthogonalPolynomials = "291c01f3-23f6-4eb6-aeb0-063a639b53f2"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[compat]
+BlockArrays = "0.16"
+BlockBandedMatrices = "0.12"
+ClassicalOrthogonalPolynomials = "0.11"
+ContinuumArrays = "0.14"
+DomainSets = "0.6"
+FastTransforms = "0.15"
+FillArrays = "1"
+HarmonicOrthogonalPolynomials = "0.4"
+LazyArrays = "1"
+MultivariateOrthogonalPolynomials = "0.5"
+QuasiArrays = "0.11"
+SemiclassicalOrthogonalPolynomials = "0.5"
+StaticArrays = "1"
+julia = "1.9"
+
+[extras]
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+
+[targets]
+test = ["ForwardDiff", "Random", "Test"]
