@@ -1,6 +1,6 @@
 module AnnuliOrthogonalPolynomials
 using BlockArrays, BlockBandedMatrices, ClassicalOrthogonalPolynomials, ContinuumArrays, DomainSets, FastTransforms, FillArrays,
-    HarmonicOrthogonalPolynomials, LazyArrays,
+    HarmonicOrthogonalPolynomials, LazyArrays, LinearAlgebra,
     MultivariateOrthogonalPolynomials, QuasiArrays, SemiclassicalOrthogonalPolynomials, StaticArrays 
 
 import Base: in, axes, getindex, broadcasted, tail, +, -, *, /, \, convert, OneTo, show, summary, ==, oneto, diff
