@@ -134,7 +134,9 @@ function \(A::ZernikeAnnulus{T}, B::Weighted{V,ZernikeAnnulus{V}}) where {T,V}
     L₁ = Weighted.(SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)) .\ Weighted.(SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞))
     L₂ = SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞) .\ SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)
 
-    L = (one(TV)-ρ^2)^2 .* (L₂ .* L₁)
+    # L = (one(TV)-ρ^2)^2 .* (L₂ .* L₁)
+    # Workaround for broken lazy multiplication
+    L = BroadcastVector{AbstractMatrix{TV}}((L2, L1) -> (one(TV)-ρ^2)^2 .* ApplyArray(*,L2,L1), L₂, L₁)
     ModalInterlace{TV}(L, (ℵ₀,ℵ₀), (4, 4))
 end
 
