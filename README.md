@@ -17,7 +17,9 @@ with respect to the weight `(r² - ρ²)ᵃ * (1-r²)ᵇ`. This builds on top of
 ```julia
 julia> using AnnuliOrthogonalPolynomials, StaticArrays
 
-julia> Z = ZernikeAnnulus(0.5, 0, 0)
+julia> ρ, a, b = 0.5, 0.0, 0.0;
+
+julia> Z = ZernikeAnnulus(ρ, a, b)
 ZernikeAnnulus{Float64}(0.5, 0.0, 0.0)
 
 julia> Z[SVector(0.5,0.2), Block.(1:3)] # Blocked by degree
