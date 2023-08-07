@@ -1,6 +1,6 @@
 using Test, AnnuliOrthogonalPolynomials, ClassicalOrthogonalPolynomials, SemiclassicalOrthogonalPolynomials, LinearAlgebra
 import ForwardDiff: derivative, hessian, gradient
-import AnnuliOrthogonalPolynomials: ZernikeAnnulusTransform, ZernikeAnnulusITransform, plotgrid, plotvalues
+import AnnuliOrthogonalPolynomials: ZernikeAnnulusTransform, ZernikeAnnulusITransform, plotgrid, plotvalues, AnnulusWeight, copy
 import BlockArrays: PseudoBlockArray, blockcolsupport
 import SemiclassicalOrthogonalPolynomials: HalfWeighted
 import LazyArrays: Ones
@@ -102,15 +102,45 @@ import LazyArrays: Ones
                     4t*cos(m*θ) * r^m * (t-τ)^(-m) * derivative(τ -> (t-τ)^(m+1) * derivative(g, τ), τ)
     end
 
+    @testset "AnnulusWeight" begin
+        a,b,ρ = 1.0, 1.0, 0.5
+        w = AnnulusWeight(ρ,a,b)
+        @test w.a == a
+        @test w.b == b
+        @test w.ρ == ρ
+
+        @test AnnulusWeight{Float32}(ρ) == AnnulusWeight{Float32}(ρ, zero(Float32), zero(Float32))
+        @test AnnulusWeight(ρ) == AnnulusWeight{Float64}(ρ, zero(Float64), zero(Float64))
+
+        @test copy(w) == w
+
+        @test (w == AnnulusWeight(0.1,a,b) == AnnulusWeight(ρ,0.0,1.0) == AnnulusWeight(ρ,1.0,0.0)) == false
+        @test w == AnnulusWeight(ρ,a,b)
+    end
+
     @testset "Real" begin
         ρ  = 0.5; t = inv(1-ρ^2)
+
+        @testset "basics" begin
+            a,b,ρ = 1.0, 1.0, 0.5
+            Z = ZernikeAnnulus(ρ,a,b)
+            @test Z.a == a
+            @test Z.b == b
+            @test Z.ρ == ρ
+            @test Z == ZernikeAnnulus(ρ,a,b)
+            @test ZernikeAnnulus(ρ) == ZernikeAnnulus{Float64}(ρ, zero(Float64), zero(Float64))
+            @test ZernikeAnnulus{Float32}(ρ) == ZernikeAnnulus{Float32}(ρ, zero(Float32), zero(Float32))
+            @test copy(Z) == Z
+        end
 
         @testset "Unweighted" begin
             A = ZernikeAnnulus(ρ)
             C = ZernikeAnnulus(ρ,2,2)
-            Δ  = C \ (Laplacian(axes(A,1)) * A)
-
             xy = SVector(0.5,0.1)
+
+            @test A[xy, 1:3] ≈ [1.0;0.10000000000000002;0.5]
+
+            Δ  = C \ (Laplacian(axes(A,1)) * A)
             # @test tr(hessian(xy -> ZernikeAnnulus{eltype(xy)}(ρ)[xy,4], xy)) ≈ C[xy,1] * Δ[1,4]
             # @test tr(hessian(xy -> ZernikeAnnulus{eltype(xy)}(ρ)[xy,7], xy)) ≈ C[xy,2] * Δ[2,7]
             # @test tr(hessian(xy -> ZernikeAnnulus{eltype(xy)}(ρ)[xy,8], xy)) ≈ C[xy,3] * Δ[3,8]
@@ -130,6 +160,7 @@ import LazyArrays: Ones
             Δ  = P \ (Laplacian(axes(P,1)) * W)
 
             xy = SVector(0.5,0.1); r = norm(xy); τ = (1-r^2)/(1-ρ^2)
+            @test W[xy, 1:3] ≈  [0.007400000000000006;0.0007400000000000007;0.003700000000000003]
             @test Weighted(ZernikeAnnulus{eltype(xy)}(ρ,1,1))[xy,1] ≈ (1-r^2) * (r^2-ρ^2) * ZernikeAnnulus{eltype(xy)}(ρ,1,1)[xy,1] ≈ (1-ρ^2)^2 * HalfWeighted{:ab}(SemiclassicalJacobi.(t,1,1,0:∞)[1])[τ,1]
             @test tr(hessian(xy -> Weighted(ZernikeAnnulus{eltype(xy)}(ρ,1,1))[xy,1], xy)) ≈ P[xy,1:4]'* Δ[1:4,1]
 
@@ -175,10 +206,24 @@ import LazyArrays: Ones
     end
 
     @testset "Complex" begin
+
+        @testset "basics" begin
+            a,b,ρ = 1.0, 1.0, 0.5
+            Z = ComplexZernikeAnnulus(ρ,a,b)
+            @test Z.a == a
+            @test Z.b == b
+            @test Z.ρ == ρ
+            @test Z == ComplexZernikeAnnulus(ρ,a,b)
+            @test ComplexZernikeAnnulus(ρ) == ComplexZernikeAnnulus{Float64}(ρ, zero(Float64), zero(Float64))
+            @test ComplexZernikeAnnulus{Float32}(ρ) == ComplexZernikeAnnulus{Float32}(ρ, zero(Float32), zero(Float32))
+        end
+
         ρ  = 0.5
         A = ComplexZernikeAnnulus(ρ)
         B = ComplexZernikeAnnulus(ρ,0,1)
 
+        xy = SVector(0.5,0.1)
+        @test A[xy, 1:3] ≈ [1.0 + 0.0im;0.5 + 0.10000000000000002im;0.5 + 0.10000000000000002im]
         R = B \ A
         @test A[SVector(0.5,0.1), Block.(1:3)]' ≈ B[SVector(0.5,0.1), Block.(1:3)]' * R[Block.(1:3),Block.(1:3)]
 
