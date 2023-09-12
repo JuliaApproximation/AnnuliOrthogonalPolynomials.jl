@@ -225,7 +225,8 @@ end
 # Creates vector correctly interlacing the denormalization
 # constants for each m-mode.
 function denormalize_annulus(A::AbstractVector, a, b, c, ρ, analysis=true)
-    l = length(A)
+    supp = Int(last(blockcolsupport(A)))
+    l = length(A[Block.(1:supp)])
     bl = [findblockindex(blockedrange(oneto(∞)), j) for j in 1:l]
     ℓ = [bl[j].I[1]-1 for j in 1:l] # degree
     k = [bl[j].α[1] for j in 1:l]   # index of degree
@@ -234,8 +235,8 @@ function denormalize_annulus(A::AbstractVector, a, b, c, ρ, analysis=true)
     w = AnnulusWeight(ρ, a, b)
     constants = normalize_mmodes(w)[1:l] # m-mode constants
     d = [inv(constants[mm+1]*ss) for (mm, ss) in zip(m, s)] # multiply by relevant (-1)
-    analysis && return d.*A # multiply vector by denormalization if analysis
-    A ./ d # divide vector by denormalization if synthesis
+    analysis && return [d.*A[1:l];A[l+1:end]] # multiply vector by denormalization if analysis
+    [A[1:l]./d;A[l+1:end]]  # divide vector by denormalization if synthesis
 end
 
 struct ZernikeAnnulusTransform{T} <: Plan{T}
