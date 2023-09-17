@@ -212,14 +212,14 @@ end
 
 # FastTransforms uses orthonormalized annulus OPs so we need to correct the normalization
 # Gives a vector with the weights of each m-mode.
-function normalize_mmodes(w::AnnulusWeight{T}) where T
+function normalize_mmodes(w::AnnulusWeight{T}, l::Int) where T
     (ρ,a,b) = convert(T,w.ρ), convert(T,w.a), convert(T,w.b)
     t = inv(one(T)-ρ^2)
     # contribution from non-normalized semiclassical Jacobi
-    jw = sum.(SemiclassicalJacobiWeight{T}.(t,b,a,0:∞))
+    jw = sum.(SemiclassicalJacobiWeight.(t,b,a,0:(l-1)))
     # π comes from contribution of Harmonic polynomials and t^(a+b+one(T)) from the change of variables
     m₀ =  sqrt( convert(T,π) / t^(a+b+one(T)) ) * sqrt(jw[1])
-    vcat([m₀], sqrt.( convert(T,π) ./ (2 * t.^( (a+b+one(T)) .+ one(T):∞))).* sqrt.(jw[2:end]))
+    vcat([m₀], sqrt.( convert(T,π) ./ (2 * t.^( (a+b+2*one(T)):(convert(T,l)+a+b)))) .* sqrt.(jw[2:end]))
 end
 
 # Creates vector correctly interlacing the denormalization
@@ -233,7 +233,7 @@ function denormalize_annulus(A::AbstractVector, a, b, c, ρ, analysis=true)
     m = [iseven(ℓ[j]) ? k[j]-isodd(k[j]) : k[j]-iseven(k[j]) for j in 1:l] # m-mode
     s = (-1).^Int.((ℓ .- m) ./ 2) # denormalization includes negatives (-1)^(degree - m)/2
     w = AnnulusWeight(ρ, a, b)
-    constants = normalize_mmodes(w)[1:l] # m-mode constants
+    constants = normalize_mmodes(w, l) # m-mode constants
     d = [inv(constants[mm+1]*ss) for (mm, ss) in zip(m, s)] # multiply by relevant (-1)
     analysis && return [d.*A[1:l];A[l+1:end]] # multiply vector by denormalization if analysis
     [A[1:l]./d;A[l+1:end]]  # divide vector by denormalization if synthesis
