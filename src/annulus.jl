@@ -273,4 +273,4 @@ end
 *(P::ZernikeAnnulusTransform{T}, f::Matrix{T}) where T = denormalize_annulus(ModalTrav(P.ann2cxf \ (P.analysis * f)), P.a, P.b, P.c, P.ρ)
 *(P::ZernikeAnnulusITransform, f::AbstractVector) = P.synthesis * (P.ann2cxf * ModalTrav(denormalize_annulus(f, P.a, P.b, P.c, P.ρ, false)).matrix)
 
-plan_grid_transform(S::ZernikeAnnulus{T}, B::Tuple{Block{1}}, dims=1:1) where T = grid(S, B[1]), ZernikeAnnulusTransform{T}(Int(B[1]), S.a, S.b, zero(T), S.ρ)
+plan_transform(S::ZernikeAnnulus{T}, (B,)::Tuple{Block{1}}, dims=1:1) where T = ZernikeAnnulusTransform{T}(Int(B), S.a, S.b, zero(T), S.ρ)
