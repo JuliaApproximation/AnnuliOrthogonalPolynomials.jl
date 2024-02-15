@@ -175,7 +175,7 @@ function grid(S::ZernikeAnnulus{T}, B::Block{1}) where T
     ρ = parent(S).ρ
 
     # The radial grid:
-    r = [begin t = (N-n-one(T)/2)/(2N); ct = sinpi(t); st = cospi(t); sqrt(ct^2+ρ^2*st^2) end; for n in 0:N-1]
+    r = [first([begin t = (N-n-one(T)/2)/(2N); ct = sinpi(t); st = cospi(t); sqrt(ct^2+ρ^2*st^2) end]) for n in 0:N-1]
 
     # The angular grid:
     θ = (0:M-1)*convert(T,2)/M
