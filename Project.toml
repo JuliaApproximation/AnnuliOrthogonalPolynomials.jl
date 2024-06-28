@@ -1,7 +1,7 @@
 name = "AnnuliOrthogonalPolynomials"
 uuid = "de1797fd-24c3-4035-91a2-b52aecdcfb01"
 authors = ["john.papad "]
-version = "0.0.5"
+version = "0.0.6"
 
 [deps]
 BlockArrays = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
@@ -20,20 +20,20 @@ SemiclassicalOrthogonalPolynomials = "291c01f3-23f6-4eb6-aeb0-063a639b53f2"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-BlockArrays = "0.16"
-BlockBandedMatrices = "0.12"
-ClassicalOrthogonalPolynomials = "0.12"
-ContinuumArrays = "0.17"
+BlockArrays = "1.1"
+BlockBandedMatrices = "0.13"
+ClassicalOrthogonalPolynomials = "0.13"
+ContinuumArrays = "0.18"
 DomainSets = "0.7"
-FastTransforms = "0.15"
+FastTransforms = "0.16"
 FillArrays = "1"
-HarmonicOrthogonalPolynomials = "0.5"
-LazyArrays = "1"
-MultivariateOrthogonalPolynomials = "0.6"
+HarmonicOrthogonalPolynomials = "0.6"
+LazyArrays = "2.1"
+MultivariateOrthogonalPolynomials = "0.7"
 QuasiArrays = "0.11"
 SemiclassicalOrthogonalPolynomials = "0.5"
 StaticArrays = "1"
-julia = "1.9"
+julia = "1.10"
 
 [extras]
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"

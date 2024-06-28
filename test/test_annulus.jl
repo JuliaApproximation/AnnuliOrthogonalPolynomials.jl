@@ -1,7 +1,7 @@
 using Test, AnnuliOrthogonalPolynomials, ClassicalOrthogonalPolynomials, SemiclassicalOrthogonalPolynomials, LinearAlgebra
 import ForwardDiff: derivative, hessian, gradient
 import AnnuliOrthogonalPolynomials: ZernikeAnnulusTransform, ZernikeAnnulusITransform, plotgrid, plotvalues, AnnulusWeight, copy
-import BlockArrays: PseudoBlockArray, blockcolsupport
+import BlockArrays: BlockArray, blockcolsupport
 import SemiclassicalOrthogonalPolynomials: HalfWeighted
 import LazyArrays: Ones
 
@@ -192,7 +192,7 @@ import LazyArrays: Ones
         T = ZernikeAnnulusTransform{Float64}(N,0,0,0,0.5)
         Ti = ZernikeAnnulusITransform{Float64}(N,0,0,0,0.5)
 
-        v = PseudoBlockArray(randn(sum(1:N)),1:N)
+        v = BlockArray(randn(sum(1:N)),1:N)
         @test T * (Ti * v) ≈ v
         @test_throws MethodError T * randn(15)
 
