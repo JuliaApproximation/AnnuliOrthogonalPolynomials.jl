@@ -152,7 +152,7 @@ end
 ###
 
 
-@simplify function *(Δ::Laplacian, W::Weighted{<:Any,<:ZernikeAnnulus})
+function laplacian(W::Weighted{<:Any,<:ZernikeAnnulus})
     P = W.P
     @assert P.a == P.b == 1
     ρ = P.ρ; t = inv(1-ρ^2)
@@ -162,7 +162,7 @@ end
     P * ModalInterlace(Δs, (ℵ₀,ℵ₀), (2,2))
 end
 
-@simplify function *(Δ::Laplacian, P::ZernikeAnnulus)
+function laplacian(P::ZernikeAnnulus)
     ρ,a,b = P.ρ,P.a,P.b
     t = inv(1-ρ^2)
     T = eltype(P)
