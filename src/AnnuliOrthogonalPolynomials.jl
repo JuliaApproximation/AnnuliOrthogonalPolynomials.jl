@@ -9,12 +9,12 @@ import ClassicalOrthogonalPolynomials: checkpoints, ShuffledR2HC, TransformFacto
 import ContinuumArrays: Weight, weight, grid, ℵ₁, ℵ₀, unweighted, plan_transform
 import HarmonicOrthogonalPolynomials: BivariateOrthogonalPolynomial, MultivariateOrthogonalPolynomial, Plan
 import MultivariateOrthogonalPolynomials: BlockOneTo, ModalInterlace, laplacian, ModalTrav
-import SemiclassicalOrthogonalPolynomials: divdiff, HalfWeighted
+import SemiclassicalOrthogonalPolynomials: divdiff, HalfWeighted, SemiclassicalJacobiFamily
 
-export Block, SVector, CircleCoordinate, ZernikeAnnulus, ComplexZernikeAnnulus, Laplacian
+export Block, SVector, CircleCoordinate, ZernikeAnnulus, ComplexZernikeAnnulus, Laplacian, JacobiDiskSlice
 
-abstract type AnnuliOrthogonalPolynomial{d,T} <: MultivariateOrthogonalPolynomial{d,T} end
 
 include("annulus.jl")
+include("diskslice.jl")
 
 end # module AnnuliOrthogonalPolynomials

@@ -1,7 +1,7 @@
 name = "AnnuliOrthogonalPolynomials"
 uuid = "de1797fd-24c3-4035-91a2-b52aecdcfb01"
 authors = ["john.papad "]
-version = "0.1"
+version = "0.1.0"
 
 [deps]
 BlockArrays = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
@@ -30,6 +30,7 @@ FillArrays = "1"
 HarmonicOrthogonalPolynomials = "0.7"
 LazyArrays = "2.1"
 MultivariateOrthogonalPolynomials = "0.9"
+QuadGK = "2"
 QuasiArrays = "0.12"
 SemiclassicalOrthogonalPolynomials = "0.7"
 StaticArrays = "1"
@@ -37,8 +38,9 @@ julia = "1.10"
 
 [extras]
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["ForwardDiff", "Random", "Test"]
+test = ["ForwardDiff", "QuadGK", "Random", "Test"]
