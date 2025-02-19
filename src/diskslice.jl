@@ -66,7 +66,7 @@ function getindex(P::JacobiDiskSlice{T}, 𝐱::StaticVector{2}, B::BlockIndex{1}
     n,k = Int(block(B)), blockindex(B)
     x,y = 𝐱
     ρ = sqrt(1-x^2)
-    P.P[k][(x-1)/(P.α-1),n-k+1] * ρ^(k-1) * jacobip(k-1, P.b, P.b, y/ρ)
+    P.P[k][(x-1)/(P.α-1),n-k+1] * ρ^(k-1) * ultrasphericalc(k-1, P.b+one(T)/2, y/ρ)
 end
 getindex(P::JacobiDiskSlice, 𝐱::StaticVector{2}, B::Block{1}) = [P[𝐱, B[j]] for j=1:Int(B)]
 getindex(P::JacobiDiskSlice, 𝐱::StaticVector{2}, JR::BlockOneTo) = mortar([P[𝐱,Block(J)] for J = 1:Int(JR[end])])
