@@ -101,8 +101,9 @@ function getindex(Z::ZernikeAnnulus{T}, rθ::RadialCoordinate, B::BlockIndex{1})
     ℓ = Int(block(B))-1
     k = blockindex(B)
     m = iseven(ℓ) ? k-isodd(k) : k-iseven(k)
-    r,θ = rθ.r,rθ.θ
-    (isodd(k+ℓ) ? cos(m*θ) : sin(m*θ)) * r^m * Z.P[m+1][(r^2 - 1)/(ρ^2 - 1), (ℓ-m) ÷ 2 + 1]
+    (; r, θ) = rθ
+    (; ρ, a, b, P) = Z
+    (isodd(k+ℓ) ? cos(m*θ) : sin(m*θ)) * zernikeannulusr(ρ, ℓ, m, a, b, r, P[m+1])
 end
 
 
@@ -110,7 +111,9 @@ function getindex(Z::ComplexZernikeAnnulus{T}, rθ::RadialCoordinate, B::BlockIn
     ℓ = Int(block(B))-1
     k = blockindex(B)
     m = iseven(ℓ) ? k-isodd(k) : k-iseven(k)
-    complexzernikeannulusz(Z.ρ, ℓ, (isodd(k+ℓ) ? 1 : -1) * m, Z.a, Z.b, rθ)
+    (; r, θ) = rθ
+    (; ρ, a, b, P) = Z
+    exp(im*(isodd(k+ℓ) ? m : -m)*θ) * zernikeannulusr(ρ, ℓ, m, a, b, r, P[m+1])
 end
 
 

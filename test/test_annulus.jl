@@ -223,7 +223,7 @@ import LazyArrays: Ones
         B = ComplexZernikeAnnulus(ρ,0,1)
 
         xy = SVector(0.5,0.1)
-        @test A[xy, 1:3] ≈ [1.0 + 0.0im;0.5 + 0.10000000000000002im;0.5 + 0.10000000000000002im]
+        @test A[xy, 1:3] ≈ [1.0 + 0.0im;0.5 - 0.10000000000000002im;0.5 + 0.10000000000000002im]
         R = B \ A
         @test A[SVector(0.5,0.1), Block.(1:3)]' ≈ B[SVector(0.5,0.1), Block.(1:3)]' * R[Block.(1:3),Block.(1:3)]
 
