@@ -37,7 +37,8 @@ struct ZernikeAnnulus{T} <: AbstractZernikeAnnulus{T}
     ρ::T
     a::T
     b::T
-    ZernikeAnnulus{T}(ρ::T, a::T, b::T) where T = new{T}(ρ, a, b)
+    P::SemiclassicalJacobiFamily{T}
+    ZernikeAnnulus{T}(ρ::T, a::T, b::T) where T = new{T}(ρ, a, b, SemiclassicalJacobiFamily(inv(1-ρ^2),b,a,0:∞))
 end
 
 """
@@ -49,7 +50,8 @@ struct ComplexZernikeAnnulus{T} <: AbstractZernikeAnnulus{Complex{T}}
     ρ::T
     a::T
     b::T
-    ComplexZernikeAnnulus{T}(ρ::T, a::T, b::T) where T = new{T}(ρ, a, b)
+    P::SemiclassicalJacobiFamily{T}
+    ComplexZernikeAnnulus{T}(ρ::T, a::T, b::T) where T = new{T}(ρ, a, b, SemiclassicalJacobiFamily(inv(1-ρ^2),b,a,0:∞))
 end
 
 
@@ -71,7 +73,9 @@ copy(A::AbstractZernikeAnnulus) = A
 
 orthogonalityweight(Z::AbstractZernikeAnnulus) = AnnulusWeight(Z.ρ, Z.a, Z.b)
 
-zernikeannulusr(ρ, ℓ, m, a, b, r::T) where T = r^m * SemiclassicalJacobi{T}(inv(1-ρ^2),b,a,m)[(r^2 - 1)/(ρ^2 - 1), (ℓ-m) ÷ 2 + 1]
+zernikeannulusr(ρ, ℓ, m, a, b, r, P) = r^m * P[(r^2 - 1)/(ρ^2 - 1), (ℓ-m) ÷ 2 + 1]
+
+zernikeannulusr(ρ, ℓ, m, a, b, r::T) where T = zernikeannulusr(ρ, ℓ, m, a, b, r, SemiclassicalJacobi{T}(inv(1-ρ^2),b,a,m))
 function zernikeannulusz(ρ, ℓ, ms, a, b, rθ::RadialCoordinate{T}) where T
     r,θ = rθ.r,rθ.θ
     m = abs(ms)
@@ -97,7 +101,8 @@ function getindex(Z::ZernikeAnnulus{T}, rθ::RadialCoordinate, B::BlockIndex{1})
     ℓ = Int(block(B))-1
     k = blockindex(B)
     m = iseven(ℓ) ? k-isodd(k) : k-iseven(k)
-    zernikeannulusz(Z.ρ, ℓ, (isodd(k+ℓ) ? 1 : -1) * m, Z.a, Z.b, rθ)
+    r,θ = rθ.r,rθ.θ
+    (isodd(k+ℓ) ? cos(m*θ) : sin(m*θ)) * r^m * Z.P[m+1][(r^2 - 1)/(ρ^2 - 1), (ℓ-m) ÷ 2 + 1]
 end
 
 
