@@ -155,24 +155,32 @@ import LazyArrays: Ones
         end
 
         @testset "Weighted" begin
-            P = ZernikeAnnulus(ρ,1,1)
-            W = Weighted(P)
-            Δ  = P \ (Laplacian(axes(P,1)) * W)
+            Q = ZernikeAnnulus(ρ,1,1)
+            W = Weighted(Q)
+            P = ZernikeAnnulus(ρ)
+
+            c = transform(Q, splat((x,y) -> exp(x*cos(y))))
+            x,y = 𝐱 = SVector(0.7,0.2)
+            @test (W * c)[𝐱] ≈ (1 - norm(𝐱)^2)*(norm(𝐱)^2-ρ^2) * exp(x*cos(y))
+            KR = Block.(Base.OneTo(100))
+            @test (P[:,KR] * ((P\W)[KR,KR] * c[KR]))[𝐱] ≈ (1 - norm(𝐱)^2)*(norm(𝐱)^2-ρ^2) * exp(x*cos(y))
+
+            Δ  = Q \ (Laplacian(axes(Q,1)) * W)
 
             xy = SVector(0.5,0.1); r = norm(xy); τ = (1-r^2)/(1-ρ^2)
             @test W[xy, 1:3] ≈  [0.007400000000000006;0.0007400000000000007;0.003700000000000003]
             @test Weighted(ZernikeAnnulus{eltype(xy)}(ρ,1,1))[xy,1] ≈ (1-r^2) * (r^2-ρ^2) * ZernikeAnnulus{eltype(xy)}(ρ,1,1)[xy,1] ≈ (1-ρ^2)^2 * HalfWeighted{:ab}(SemiclassicalJacobi.(t,1,1,0:∞)[1])[τ,1]
-            @test tr(hessian(xy -> Weighted(ZernikeAnnulus{eltype(xy)}(ρ,1,1))[xy,1], xy)) ≈ P[xy,1:4]'* Δ[1:4,1]
+            @test tr(hessian(xy -> Weighted(ZernikeAnnulus{eltype(xy)}(ρ,1,1))[xy,1], xy)) ≈ Q[xy,1:4]'* Δ[1:4,1]
 
             # TODO get hessian working again
             # c = [randn(100); zeros(∞)]
-            # @test tr(hessian(xy -> (Weighted(ZernikeAnnulus{eltype(xy)}(ρ,1,1))*c)[xy], xy)) ≈ (P*(Δ*c))[xy]
+            # @test tr(hessian(xy -> (Weighted(ZernikeAnnulus{eltype(xy)}(ρ,1,1))*c)[xy], xy)) ≈ (Q*(Δ*c))[xy]
 
             c = [Ones(10); zeros(∞)]
-            @test (P*(Δ*c))[xy] ≈ -0.4023800762027685
+            @test (Q*(Δ*c))[xy] ≈ -0.4023800762027685
 
-            L = P \ W
-            @test W[xy, 1:10] ≈ (P[xy, 1:50]'*L[1:50,1:50])[1:10]
+            L = Q \ W
+            @test W[xy, 1:10] ≈ (Q[xy, 1:50]'*L[1:50,1:50])[1:10]
         end
     end
 

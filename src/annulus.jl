@@ -139,7 +139,7 @@ function \(A::ZernikeAnnulus{T}, B::Weighted{V,ZernikeAnnulus{V}}) where {T,V}
     Q₁₁ = B.P.P # SemiclassicalJacobi{real(TV)}.(t,1,1,0:∞)
     if A.a == A.b == 0
         Q₀₀ = A.P # SemiclassicalJacobi{real(TV)}.(t,0,0,0:∞)
-        L = BroadcastVector{AbstractMatrix{TV}}(L1 -> (one(TV)-ρ^2) * L1, Weighted.(Q₀₀) .\ Weighted.(Q₁₁))
+        L = BroadcastVector{AbstractMatrix{TV}}(L1 -> (one(TV)-ρ^2)^2 * L1, Weighted.(Q₀₀) .\ Weighted.(Q₁₁))
         ModalInterlace{TV}(L, (ℵ₀,ℵ₀), (4, 0))
     else
         @assert A.a == A.b == 1
@@ -169,7 +169,7 @@ function laplacian(W::Weighted{<:Any,<:ZernikeAnnulus})
     @assert P.a == P.b == 1
     ρ = P.ρ; t = inv(1-ρ^2)
     T = eltype(P)
-    Ps = SemiclassicalJacobi{T}.(t,1,1,0:∞)
+    Ps = P.P
     Δs = BroadcastVector{AbstractMatrix{T}}((C,B,A) -> 4t*(1-ρ^2)^2*divdiff(HalfWeighted{:c}(C), HalfWeighted{:c}(B))*divdiff(HalfWeighted{:ab}(B), HalfWeighted{:ab}(A)), Ps, SemiclassicalJacobi.(t,0,0,1:∞), Ps)
     P * ModalInterlace(Δs, (ℵ₀,ℵ₀), (2,2))
 end
@@ -178,7 +178,7 @@ function laplacian(P::ZernikeAnnulus)
     ρ,a,b = P.ρ,P.a,P.b
     t = inv(1-ρ^2)
     T = eltype(P)
-    Ps = SemiclassicalJacobi.(t,b,a,0:∞)
+    Ps = P.P
     Δs = BroadcastVector{AbstractMatrix{T}}((C,B,A) -> 4t*divdiff(HalfWeighted{:c}(C), HalfWeighted{:c}(B))*divdiff(B, A), SemiclassicalJacobi.(t,b+2,a+2,0:∞), SemiclassicalJacobi.(t,b+1,a+1,1:∞), Ps)
     ZernikeAnnulus(ρ,a+2,b+2) * ModalInterlace(Δs, (ℵ₀,ℵ₀), (-2,6))
 end
@@ -253,8 +253,8 @@ function denormalize_annulus(A::AbstractVector, a, b, c, ρ, analysis=true)
     w = AnnulusWeight(ρ, a, b)
     constants = normalize_mmodes(w)[1:l] # m-mode constants
     d = [inv(constants[mm+1]*ss) for (mm, ss) in zip(m, s)] # multiply by relevant (-1)
-    analysis && return d.*A # multiply vector by denormalization if analysis
-    A ./ d # divide vector by denormalization if synthesis
+    analysis && return broadcast!(*, A, d, A) # multiply vector by denormalization if analysis
+    broadcast!(/, A, A, d) # divide vector by denormalization if synthesis
 end
 
 # # FastTransforms uses orthonormalized annulus OPs so we need to correct the normalization
