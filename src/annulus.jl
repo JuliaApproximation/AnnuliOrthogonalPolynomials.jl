@@ -133,25 +133,29 @@ end
 function \(A::ZernikeAnnulus{T}, B::Weighted{V,ZernikeAnnulus{V}}) where {T,V}
     TV = promote_type(T,V)
     (A.a == B.P.a == A.b == B.P.b == 0 && A.ρ == B.P.ρ) && return Eye{TV}(∞)
-    @assert A.a == A.b == 1
     @assert B.P.a == B.P.b == 1
     @assert A.ρ == B.P.ρ
-
     ρ = convert(TV, A.ρ); t=inv(one(TV)-ρ^2)
+    Q₁₁ = B.P.P # SemiclassicalJacobi{real(TV)}.(t,1,1,0:∞)
+    if A.a == A.b == 0
+        Q₀₀ = A.P # SemiclassicalJacobi{real(TV)}.(t,0,0,0:∞)
+        L = BroadcastVector{AbstractMatrix{TV}}(L1 -> (one(TV)-ρ^2) * L1, Weighted.(Q₀₀) .\ Weighted.(Q₁₁))
+        ModalInterlace{TV}(L, (ℵ₀,ℵ₀), (4, 0))
+    else
+        @assert A.a == A.b == 1
+        Q₀₀ = SemiclassicalJacobi{real(TV)}.(t,0,0,0:∞)
 
-    # L₁ = Weighted.(SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)) .\ Weighted.(SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞))
-    # L₂ = SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞) .\ SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)
+        # L₁ = Weighted.(SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)) .\ Weighted.(SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞))
+        # L₂ = SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞) .\ SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)
 
-    Q₀₀ = SemiclassicalJacobi{real(TV)}.(t,0,0,0:∞)
-    Q₁₁ = SemiclassicalJacobi{real(TV)}.(t,1,1,0:∞)
+        L₁ = Weighted.(Q₀₀) .\ Weighted.(Q₁₁)
+        L₂ = Q₁₁ .\ Q₀₀
 
-    L₁ = Weighted.(Q₀₀) .\ Weighted.(Q₁₁)
-    L₂ = Q₁₁ .\ Q₀₀
-
-    # L = (one(TV)-ρ^2)^2 .* (L₂ .* L₁)
-    # Workaround for broken lazy multiplication
-    L = BroadcastVector{AbstractMatrix{TV}}((L2, L1) -> (one(TV)-ρ^2)^2 .* ApplyArray(*,L2,L1), L₂, L₁)
-    ModalInterlace{TV}(L, (ℵ₀,ℵ₀), (4, 4))
+        # L = (one(TV)-ρ^2)^2 .* (L₂ .* L₁)
+        # Workaround for broken lazy multiplication
+        L = BroadcastVector{AbstractMatrix{TV}}((L2, L1) -> (one(TV)-ρ^2)^2 .* ApplyArray(*,L2,L1), L₂, L₁)
+        ModalInterlace{TV}(L, (ℵ₀,ℵ₀), (4, 4))
+    end
 end
 
 
