@@ -37,7 +37,8 @@ struct ZernikeAnnulus{T} <: AbstractZernikeAnnulus{T}
     ρ::T
     a::T
     b::T
-    ZernikeAnnulus{T}(ρ::T, a::T, b::T) where T = new{T}(ρ, a, b)
+    P::SemiclassicalJacobiFamily{T}
+    ZernikeAnnulus{T}(ρ::T, a::T, b::T) where T = new{T}(ρ, a, b, SemiclassicalJacobiFamily(inv(1-ρ^2),b,a,0:∞))
 end
 
 """
@@ -49,7 +50,8 @@ struct ComplexZernikeAnnulus{T} <: AbstractZernikeAnnulus{Complex{T}}
     ρ::T
     a::T
     b::T
-    ComplexZernikeAnnulus{T}(ρ::T, a::T, b::T) where T = new{T}(ρ, a, b)
+    P::SemiclassicalJacobiFamily{T}
+    ComplexZernikeAnnulus{T}(ρ::T, a::T, b::T) where T = new{T}(ρ, a, b, SemiclassicalJacobiFamily(inv(1-ρ^2),b,a,0:∞))
 end
 
 
@@ -71,7 +73,9 @@ copy(A::AbstractZernikeAnnulus) = A
 
 orthogonalityweight(Z::AbstractZernikeAnnulus) = AnnulusWeight(Z.ρ, Z.a, Z.b)
 
-zernikeannulusr(ρ, ℓ, m, a, b, r::T) where T = r^m * SemiclassicalJacobi{T}(inv(1-ρ^2),b,a,m)[(r^2 - 1)/(ρ^2 - 1), (ℓ-m) ÷ 2 + 1]
+zernikeannulusr(ρ, ℓ, m, a, b, r, P) = r^m * P[(r^2 - 1)/(ρ^2 - 1), (ℓ-m) ÷ 2 + 1]
+
+zernikeannulusr(ρ, ℓ, m, a, b, r::T) where T = zernikeannulusr(ρ, ℓ, m, a, b, r, SemiclassicalJacobi{T}(inv(1-ρ^2),b,a,m))
 function zernikeannulusz(ρ, ℓ, ms, a, b, rθ::RadialCoordinate{T}) where T
     r,θ = rθ.r,rθ.θ
     m = abs(ms)
@@ -97,7 +101,9 @@ function getindex(Z::ZernikeAnnulus{T}, rθ::RadialCoordinate, B::BlockIndex{1})
     ℓ = Int(block(B))-1
     k = blockindex(B)
     m = iseven(ℓ) ? k-isodd(k) : k-iseven(k)
-    zernikeannulusz(Z.ρ, ℓ, (isodd(k+ℓ) ? 1 : -1) * m, Z.a, Z.b, rθ)
+    (; r, θ) = rθ
+    (; ρ, a, b, P) = Z
+    (isodd(k+ℓ) ? cos(m*θ) : sin(m*θ)) * zernikeannulusr(ρ, ℓ, m, a, b, r, P[m+1])
 end
 
 
@@ -105,7 +111,9 @@ function getindex(Z::ComplexZernikeAnnulus{T}, rθ::RadialCoordinate, B::BlockIn
     ℓ = Int(block(B))-1
     k = blockindex(B)
     m = iseven(ℓ) ? k-isodd(k) : k-iseven(k)
-    complexzernikeannulusz(Z.ρ, ℓ, (isodd(k+ℓ) ? 1 : -1) * m, Z.a, Z.b, rθ)
+    (; r, θ) = rθ
+    (; ρ, a, b, P) = Z
+    exp(im*(isodd(k+ℓ) ? m : -m)*θ) * zernikeannulusr(ρ, ℓ, m, a, b, r, P[m+1])
 end
 
 
@@ -125,25 +133,29 @@ end
 function \(A::ZernikeAnnulus{T}, B::Weighted{V,ZernikeAnnulus{V}}) where {T,V}
     TV = promote_type(T,V)
     (A.a == B.P.a == A.b == B.P.b == 0 && A.ρ == B.P.ρ) && return Eye{TV}(∞)
-    @assert A.a == A.b == 1
     @assert B.P.a == B.P.b == 1
     @assert A.ρ == B.P.ρ
-
     ρ = convert(TV, A.ρ); t=inv(one(TV)-ρ^2)
+    Q₁₁ = B.P.P # SemiclassicalJacobi{real(TV)}.(t,1,1,0:∞)
+    if A.a == A.b == 0
+        Q₀₀ = A.P # SemiclassicalJacobi{real(TV)}.(t,0,0,0:∞)
+        L = BroadcastVector{AbstractMatrix{TV}}(L1 -> (one(TV)-ρ^2)^2 * L1, Weighted.(Q₀₀) .\ Weighted.(Q₁₁))
+        ModalInterlace{TV}(L, (ℵ₀,ℵ₀), (4, 0))
+    else
+        @assert A.a == A.b == 1
+        Q₀₀ = SemiclassicalJacobi{real(TV)}.(t,0,0,0:∞)
 
-    # L₁ = Weighted.(SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)) .\ Weighted.(SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞))
-    # L₂ = SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞) .\ SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)
+        # L₁ = Weighted.(SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)) .\ Weighted.(SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞))
+        # L₂ = SemiclassicalJacobi{real(TV)}.(t,one(TV),one(TV),zero(TV):∞) .\ SemiclassicalJacobi{real(TV)}.(t,zero(TV),zero(TV),zero(TV):∞)
 
-    Q₀₀ = SemiclassicalJacobi{real(TV)}.(t,0,0,0:∞)
-    Q₁₁ = SemiclassicalJacobi{real(TV)}.(t,1,1,0:∞)
+        L₁ = Weighted.(Q₀₀) .\ Weighted.(Q₁₁)
+        L₂ = Q₁₁ .\ Q₀₀
 
-    L₁ = Weighted.(Q₀₀) .\ Weighted.(Q₁₁)
-    L₂ = Q₁₁ .\ Q₀₀
-
-    # L = (one(TV)-ρ^2)^2 .* (L₂ .* L₁)
-    # Workaround for broken lazy multiplication
-    L = BroadcastVector{AbstractMatrix{TV}}((L2, L1) -> (one(TV)-ρ^2)^2 .* ApplyArray(*,L2,L1), L₂, L₁)
-    ModalInterlace{TV}(L, (ℵ₀,ℵ₀), (4, 4))
+        # L = (one(TV)-ρ^2)^2 .* (L₂ .* L₁)
+        # Workaround for broken lazy multiplication
+        L = BroadcastVector{AbstractMatrix{TV}}((L2, L1) -> (one(TV)-ρ^2)^2 .* ApplyArray(*,L2,L1), L₂, L₁)
+        ModalInterlace{TV}(L, (ℵ₀,ℵ₀), (4, 4))
+    end
 end
 
 
@@ -157,7 +169,7 @@ function laplacian(W::Weighted{<:Any,<:ZernikeAnnulus})
     @assert P.a == P.b == 1
     ρ = P.ρ; t = inv(1-ρ^2)
     T = eltype(P)
-    Ps = SemiclassicalJacobi{T}.(t,1,1,0:∞)
+    Ps = P.P
     Δs = BroadcastVector{AbstractMatrix{T}}((C,B,A) -> 4t*(1-ρ^2)^2*divdiff(HalfWeighted{:c}(C), HalfWeighted{:c}(B))*divdiff(HalfWeighted{:ab}(B), HalfWeighted{:ab}(A)), Ps, SemiclassicalJacobi.(t,0,0,1:∞), Ps)
     P * ModalInterlace(Δs, (ℵ₀,ℵ₀), (2,2))
 end
@@ -166,7 +178,7 @@ function laplacian(P::ZernikeAnnulus)
     ρ,a,b = P.ρ,P.a,P.b
     t = inv(1-ρ^2)
     T = eltype(P)
-    Ps = SemiclassicalJacobi.(t,b,a,0:∞)
+    Ps = P.P
     Δs = BroadcastVector{AbstractMatrix{T}}((C,B,A) -> 4t*divdiff(HalfWeighted{:c}(C), HalfWeighted{:c}(B))*divdiff(B, A), SemiclassicalJacobi.(t,b+2,a+2,0:∞), SemiclassicalJacobi.(t,b+1,a+1,1:∞), Ps)
     ZernikeAnnulus(ρ,a+2,b+2) * ModalInterlace(Δs, (ℵ₀,ℵ₀), (-2,6))
 end
@@ -241,8 +253,8 @@ function denormalize_annulus(A::AbstractVector, a, b, c, ρ, analysis=true)
     w = AnnulusWeight(ρ, a, b)
     constants = normalize_mmodes(w)[1:l] # m-mode constants
     d = [inv(constants[mm+1]*ss) for (mm, ss) in zip(m, s)] # multiply by relevant (-1)
-    analysis && return d.*A # multiply vector by denormalization if analysis
-    A ./ d # divide vector by denormalization if synthesis
+    analysis && return broadcast!(*, A, d, A) # multiply vector by denormalization if analysis
+    broadcast!(/, A, A, d) # divide vector by denormalization if synthesis
 end
 
 # # FastTransforms uses orthonormalized annulus OPs so we need to correct the normalization
