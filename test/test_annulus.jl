@@ -2,6 +2,7 @@ using Test, AnnuliOrthogonalPolynomials, ClassicalOrthogonalPolynomials, Semicla
 import ForwardDiff: derivative, hessian, gradient
 import AnnuliOrthogonalPolynomials: ZernikeAnnulusTransform, ZernikeAnnulusITransform, plotgrid, plotvalues, AnnulusWeight, copy, annulus
 import DomainSets: choice
+import ClassicalOrthogonalPolynomials: checkpoints
 import BlockArrays: BlockArray, blockcolsupport
 import SemiclassicalOrthogonalPolynomials: HalfWeighted
 import LazyArrays: Ones
@@ -177,13 +178,31 @@ import LazyArrays: Ones
         end
     end
 
-    @testset "choice" begin
+    @testset "domain" begin
         for ρ in (0.1, 0.5, 2/3)
             d = annulus(ρ)
+            @test eltype(d) == RadialCoordinate{Float64}
+            @test axes(ZernikeAnnulus(ρ), 1) == axes(ComplexZernikeAnnulus(ρ), 1) == axes(AnnulusWeight(ρ), 1) == Inclusion(d)
+
+            r = (1 + ρ)/2
+            @test RadialCoordinate(r, 0.1) in d
+            @test SVector(r*cos(0.1), r*sin(0.1)) in d
+            @test RadialCoordinate(ρ/2, 0.1) ∉ d
+            @test SVector(ρ/2, 0) ∉ d
+            @test RadialCoordinate(1.1, 0.1) ∉ d
+
+            # RadialCoordinate is not converted when indexing the axis
+            rθ = RadialCoordinate(r, 0.1)
+            @test axes(ZernikeAnnulus(ρ), 1)[rθ] === rθ
+            @test axes(ZernikeAnnulus(ρ), 1)[SVector(rθ)] isa RadialCoordinate{Float64}
+
             xy = choice(d)
-            @test xy isa SVector{2,Float64}
+            @test xy isa RadialCoordinate{Float64}
             @test xy in d
             @test choice(Inclusion(d)) == xy
+
+            @test checkpoints(d) == [RadialCoordinate(1.0, 0.1), RadialCoordinate(1.0, 0.2)]
+            @test all(in(d), checkpoints(d))
         end
     end
 
