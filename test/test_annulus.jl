@@ -1,6 +1,7 @@
 using Test, AnnuliOrthogonalPolynomials, ClassicalOrthogonalPolynomials, SemiclassicalOrthogonalPolynomials, LinearAlgebra
 import ForwardDiff: derivative, hessian, gradient
-import AnnuliOrthogonalPolynomials: ZernikeAnnulusTransform, ZernikeAnnulusITransform, plotgrid, plotvalues, AnnulusWeight, copy
+import AnnuliOrthogonalPolynomials: ZernikeAnnulusTransform, ZernikeAnnulusITransform, plotgrid, plotvalues, AnnulusWeight, copy, annulus
+import DomainSets: choice
 import BlockArrays: BlockArray, blockcolsupport
 import SemiclassicalOrthogonalPolynomials: HalfWeighted
 import LazyArrays: Ones
@@ -173,6 +174,16 @@ import LazyArrays: Ones
 
             L = P \ W
             @test W[xy, 1:10] ≈ (P[xy, 1:50]'*L[1:50,1:50])[1:10]
+        end
+    end
+
+    @testset "choice" begin
+        for ρ in (0.1, 0.5, 2/3)
+            d = annulus(ρ)
+            xy = choice(d)
+            @test xy isa SVector{2,Float64}
+            @test xy in d
+            @test choice(Inclusion(d)) == xy
         end
     end
 
