@@ -6,12 +6,13 @@ using BlockArrays, BlockBandedMatrices, ClassicalOrthogonalPolynomials, Continuu
 import Base: in, axes, getindex, broadcasted, tail, +, -, *, /, \, convert, OneTo, show, summary, ==, oneto, diff
 import BlockArrays: block, blockindex, _BlockedUnitRange, blockcolsupport
 import ClassicalOrthogonalPolynomials: checkpoints, ShuffledR2HC, TransformFactorization, ldiv, paddeddata, jacobimatrix, orthogonalityweight, SetindexInterlace
+import DomainSets: choice, component, radius
 import ContinuumArrays: Weight, weight, grid, ℵ₁, ℵ₀, unweighted, plan_transform
 import HarmonicOrthogonalPolynomials: BivariateOrthogonalPolynomial, MultivariateOrthogonalPolynomial, Plan
-import MultivariateOrthogonalPolynomials: BlockOneTo, ModalInterlace, laplacian, ModalTrav
+import MultivariateOrthogonalPolynomials: BlockOneTo, ModalInterlace, laplacian, ModalTrav, RadialUnitDisk
 import SemiclassicalOrthogonalPolynomials: divdiff, HalfWeighted
 
-export Block, SVector, CircleCoordinate, ZernikeAnnulus, ComplexZernikeAnnulus, Laplacian
+export Block, SVector, RadialCoordinate, CircleCoordinate, ZernikeAnnulus, ComplexZernikeAnnulus, Laplacian
 
 abstract type AnnuliOrthogonalPolynomial{d,T} <: MultivariateOrthogonalPolynomial{d,T} end
 

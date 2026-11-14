@@ -1,5 +1,14 @@
-annulus(ρ::T) where T = UnitDisk{T}() \ (ρ*UnitDisk{T}())
-ClassicalOrthogonalPolynomials.checkpoints(d::DomainSets.SetdiffDomain{SVector{2, T}, Tuple{DomainSets.EuclideanUnitBall{2, T, :closed}, DomainSets.GenericBall{SVector{2, T}, :closed, T}}}) where T = [SVector{2,T}(cos(0.1),sin(0.1)), SVector{2,T}(cos(0.2),sin(0.2))]
+annulus(ρ::T) where T = RadialUnitDisk{T}() \ (ρ*RadialUnitDisk{T}())
+
+const AnnulusDomain{T} = DomainSets.SetdiffDomain{RadialCoordinate{T}, Tuple{RadialUnitDisk{T}, DomainSets.GenericBall{RadialCoordinate{T}, :closed, T}}}
+
+checkpoints(d::AnnulusDomain{T}) where T = [RadialCoordinate{T}(1,0.1), RadialCoordinate{T}(1,0.2)]
+
+# The generic `choice` for a `SetdiffDomain` does not return a point, so choose one at the mid-radius of the annulus.
+function choice(d::AnnulusDomain{T}) where T
+    ρ = radius(component(d, 2))
+    RadialCoordinate{T}((1 + ρ)/2, 0)
+end
 
 """
     AnnulusWeight(a, b)
